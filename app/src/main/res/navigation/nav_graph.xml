@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/accountsListFragment">
+
+    <!-- Accounts List Fragment -->
+    <fragment
+        android:id="@+id/accountsListFragment"
+        android:name="com.example.twofactorauthapp.AccountsListFragment"
+        android:label="Accounts List"
+        tools:layout="@layout/fragment_accounts_list">
+
+        <action
+            android:id="@+id/action_accountsListFragment_to_addAccountFragment"
+            app:destination="@id/addAccountFragment" />
+
+        <action
+            android:id="@+id/action_accountsListFragment_to_generateCodeFragment"
+            app:destination="@id/generateCodeFragment" />
+
+        <action
+            android:id="@+id/action_accountsListFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+
+        <action
+            android:id="@+id/action_accountsListFragment_to_logsFragment"
+            app:destination="@id/logFragment" />
+    </fragment>
+
+    <!-- Generate Code Fragment -->
+    <fragment
+        android:id="@+id/generateCodeFragment"
+        android:name="com.example.twofactorauthapp.GenerateCodeFragment"
+        android:label="Generate Code"
+        tools:layout="@layout/fragment_generate_code">
+
+        <argument
+            android:name="accountId"
+            app:argType="integer" />
+    </fragment>
+
+    <!-- Add Account Fragment -->
+    <fragment
+        android:id="@+id/addAccountFragment"
+        android:name="com.example.twofactorauthapp.AddAccountFragment"
+        android:label="Add Account"
+        tools:layout="@layout/fragment_add_account">
+
+        <action
+            android:id="@+id/action_addAccountFragment_to_accountsListFragment"
+            app:destination="@id/accountsListFragment" />
+
+        <action
+            android:id="@+id/action_addAccountFragment_to_logsFragment"
+            app:destination="@id/logFragment" />
+
+        <action
+            android:id="@+id/action_addAccountFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <!-- Logs Fragment -->
+    <fragment
+        android:id="@+id/logFragment"
+        android:name="com.example.twofactorauthapp.LogsFragment"
+        android:label="Authorization Logs"
+        tools:layout="@layout/fragment_log">
+
+        <action
+            android:id="@+id/action_logsFragment_to_accountsListFragment"
+            app:destination="@id/accountsListFragment" />
+
+        <action
+            android:id="@+id/action_logsFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.twofactorauthapp.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settingsFragment_to_accountsListFragment"
+            app:destination="@id/accountsListFragment" />
+
+        <action
+            android:id="@+id/action_settingsFragment_to_logsFragment"
+            app:destination="@id/logFragment" />
+    </fragment>
+
+</navigation>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/textViewAppDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Two-Factor Authentication (2FA) App provides secure access by generating TOTP codes based on your secret key. Accounts are encrypted and stored locally for security."
+            android:textSize="16sp"
+            android:paddingBottom="12dp" />
+
+        <TextView
+            android:id="@+id/textViewAuthor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Author: Diana Basaria"
+            android:textSize="16sp"
+            android:paddingBottom="12dp" />
+
+        <TextView
+            android:id="@+id/textViewInstructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="How to use:\n\n1. Tap the '+' button to add a new account.\n2. Enter or scan a secret key (QR code).\n3. Save the account to store it securely.\n4. Tap on the saved account to generate TOTP code.\n5. Use the code within 30 seconds for authentication."
+            android:textSize="16sp" />
+    </LinearLayout>
+</ScrollView>
