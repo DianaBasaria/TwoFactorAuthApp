@@ -1,7 +1,6 @@
 package com.example.twofactorauthapp
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -11,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.twofactorauthapp.data.AccountEntity
-import com.example.twofactorauthapp.data.AppDatabase
 import com.example.twofactorauthapp.data.LogEntity
 import com.example.twofactorauthapp.databinding.FragmentAccountsListBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -36,7 +34,7 @@ class AccountsListFragment : Fragment() {
         adapter = AccountsAdapter(
             onItemClick = { account ->
                 val action = AccountsListFragmentDirections
-                    .actionAccountsListFragmentToGenerateCodeFragment(account.id)
+                    .actionAccountsListFragmentToGenerateCodeFragment(account.id.toLong())
                 findNavController().navigate(action)
             },
             onDeleteClick = { account ->
@@ -86,10 +84,9 @@ class AccountsListFragment : Fragment() {
 
     private fun loadAccounts() {
         lifecycleScope.launch {
-            val accounts = AppDatabase.getInstance(requireContext())
+            val accounts = TwoFactorAuthApp.database
                 .accountDao()
                 .getAllAccounts()
-            Log.d("DEBUG_ACCOUNTS", "Accounts loaded: $accounts")
             adapter.submitList(accounts)
         }
     }
@@ -100,12 +97,10 @@ class AccountsListFragment : Fragment() {
             .setMessage("Are you sure you want to delete \"${account.name}\"?")
             .setPositiveButton("Yes") { _, _ ->
                 lifecycleScope.launch {
-                    val db = AppDatabase.getInstance(requireContext())
+                    val db = TwoFactorAuthApp.database
 
-                    // 1. წაშლა Account ცხრილიდან
                     db.accountDao().deleteAccount(account)
 
-                    // 2. ლოგის შენახვა
                     val log = LogEntity(
                         accountName = account.name,
                         timestamp = System.currentTimeMillis(),
@@ -113,7 +108,6 @@ class AccountsListFragment : Fragment() {
                     )
                     db.logDao().insertLog(log)
 
-                    // 3. განახლება UI-ში
                     loadAccounts()
                 }
             }

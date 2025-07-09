@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.twofactorauthapp.data.AccountEntity
-import com.example.twofactorauthapp.data.AppDatabase
 import com.example.twofactorauthapp.data.LogEntity
 import com.example.twofactorauthapp.databinding.FragmentAddAccountBinding
 import com.example.twofactorauthapp.util.EncryptionHelper
@@ -33,15 +32,9 @@ class AddAccountFragment : Fragment() {
                     Toast.makeText(requireContext(), "Invalid QR code", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                // ჩვეულებრივი ტექსტური QR
                 binding.etSecretKey.setText(scanned)
             }
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -54,7 +47,6 @@ class AddAccountFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        // Generate QR
         binding.btnGenerateQR.setOnClickListener {
             val secret = binding.etSecretKey.text.toString()
             if (secret.isNotEmpty()) {
@@ -65,7 +57,6 @@ class AddAccountFragment : Fragment() {
             }
         }
 
-        // Scan QR
         binding.btnScanQR.setOnClickListener {
             val options = ScanOptions().apply {
                 setPrompt("Scan a QR code")
@@ -75,7 +66,6 @@ class AddAccountFragment : Fragment() {
             qrScanLauncher.launch(options)
         }
 
-        // Save Account
         binding.btnSaveAccount.setOnClickListener {
             val secret = binding.etSecretKey.text.toString()
             val name = binding.etAccountName.text.toString().ifEmpty {
@@ -85,23 +75,12 @@ class AddAccountFragment : Fragment() {
             if (secret.isNotEmpty()) {
                 val encryptedKey = EncryptionHelper.encrypt(secret)
 
-                val account = AccountEntity(
-                    id = 0,
-                    name = name,
-                    secretKey = encryptedKey
-                )
-
-                val log = LogEntity(
-                    id = 0,
-                    accountName = name,
-                    timestamp = System.currentTimeMillis(),
-                    status = "Account Created"
-                )
+                val account = AccountEntity(0, name, encryptedKey)
+                val log = LogEntity(0, name, System.currentTimeMillis(), "Account Created")
 
                 lifecycleScope.launch {
-                    val db = AppDatabase.getInstance(requireContext())
-                    db.accountDao().insertAccount(account)
-                    db.logDao().insertLog(log)
+                    TwoFactorAuthApp.database.accountDao().insertAccount(account)
+                    TwoFactorAuthApp.database.logDao().insertLog(log)
 
                     Toast.makeText(requireContext(), "Account saved", Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
@@ -109,30 +88,6 @@ class AddAccountFragment : Fragment() {
             } else {
                 Toast.makeText(requireContext(), "Please enter a secret key", Toast.LENGTH_SHORT).show()
             }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu.clear()
-        inflater.inflate(R.menu.accounts_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> {
-                findNavController().navigate(R.id.settingsFragment)
-                true
-            }
-            R.id.action_logs -> {
-                findNavController().navigate(R.id.logFragment)
-                true
-            }
-            android.R.id.home -> {
-                findNavController().navigateUp()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 

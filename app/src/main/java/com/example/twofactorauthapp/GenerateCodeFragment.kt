@@ -33,32 +33,24 @@ class GenerateCodeFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-
-        // ანგარიშის მოძებნა Room DB-დან
         lifecycleScope.launch {
             val account = withContext(Dispatchers.IO) {
-                TwoFactorAuthApp.database.accountDao().getAccountByIdSync(args.accountId)
+                TwoFactorAuthApp.database.accountDao().getAccountById(args.accountId)
             }
 
-            if (account != null) {
-                binding.textViewAccountName.text = account.name
+            if (account == null) {
+                findNavController().navigateUp()
+                return@launch
+            }
 
-                try {
-                    // Secret Key-ის გაშიფვრა
-                    val decryptedKey = EncryptionHelper.decrypt(account.secretKey)
-                    startGeneratingCodes(decryptedKey)
-                } catch (e: Exception) {
-                    binding.textViewCode.text = "--"
-                    binding.textViewTimer.text = "Decryption failed"
-                    e.printStackTrace()
-                }
+            binding.textViewAccountName.text = account.name
 
-            } else {
-                binding.textViewAccountName.text = "Account not found"
+            try {
+                val decryptedKey = EncryptionHelper.decrypt(account.secretKey)
+                startGeneratingCodes(decryptedKey)
+            } catch (e: Exception) {
                 binding.textViewCode.text = "--"
-                binding.textViewTimer.text = ""
+                binding.textViewTimer.text = "Decryption failed"
             }
         }
     }
@@ -78,8 +70,7 @@ class GenerateCodeFragment : Fragment() {
         timer?.cancel()
         timer = object : CountDownTimer(secondsRemaining * 1000L, 1000L) {
             override fun onTick(millisUntilFinished: Long) {
-                val remaining = millisUntilFinished / 1000
-                binding.textViewTimer.text = "Expires in: ${remaining}s"
+                binding.textViewTimer.text = "Expires in: ${millisUntilFinished / 1000}s"
             }
 
             override fun onFinish() {

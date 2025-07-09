@@ -38,7 +38,7 @@
 
         <argument
             android:name="accountId"
-            app:argType="integer" />
+            app:argType="long" />
     </fragment>
 
     <!-- Add Account Fragment -->
