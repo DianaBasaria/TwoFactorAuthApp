@@ -5,11 +5,9 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.twofactorauthapp.data.AppDatabase
 import com.example.twofactorauthapp.databinding.FragmentLogBinding
 import kotlinx.coroutines.launch
 import androidx.navigation.fragment.findNavController
-
 
 class LogsFragment : Fragment() {
 
@@ -20,7 +18,7 @@ class LogsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true) // მენიუს მხარდაჭერა
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -32,6 +30,7 @@ class LogsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         loadLogs()
     }
@@ -46,13 +45,9 @@ class LogsFragment : Fragment() {
 
     private fun loadLogs() {
         lifecycleScope.launch {
-            val logs = AppDatabase.getInstance(requireContext())
-                .logDao()
-                .getAllLogs()
-
+            val logs = TwoFactorAuthApp.database.logDao().getAllLogs()
             logAdapter.submitList(logs)
 
-            // placeholder-ის მართვა
             binding.textViewEmptyLogs.visibility = if (logs.isEmpty()) View.VISIBLE else View.GONE
         }
     }
@@ -75,6 +70,11 @@ class LogsFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadLogs()
     }
 
     override fun onDestroyView() {

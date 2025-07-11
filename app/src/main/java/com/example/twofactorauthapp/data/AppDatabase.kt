@@ -20,14 +20,15 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "twofactorauth-db"
+                    "two_factor_auth_db"
                 )
                     .fallbackToDestructiveMigration()
                     .build()
-                    .also { INSTANCE = it }
+                INSTANCE = instance
+                instance
             }
         }
     }

@@ -12,12 +12,6 @@ class TwoFactorAuthApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        database = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "two_factor_auth_db"
-        )
-            .fallbackToDestructiveMigration()
-            .build()
+        database = AppDatabase.getInstance(applicationContext)
     }
 }
