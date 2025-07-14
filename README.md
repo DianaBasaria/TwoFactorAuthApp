@@ -3,6 +3,7 @@
 **TwoFactorAuthApp** არის Android-ზე შექმნილი ორ-ფაქტორიანი ავთენტიფიკაციის (2FA) აპლიკაცია, რომელიც იყენებს TOTP (Time-based One-Time Password) ალგორითმს უსაფრთხო კოდების გენერირებისთვის.
 აპლიკაცია შექმნილია Kotlin ენაზე და მოიცავს უსაფრთხო მონაცემთა შენახვისა და ავთენტიფიკაციის ძირითად მექანიზმებს.
 
+
 ძირითადი ფუნქციები
 
 TOTP კოდების გენერაცია რეალურ დროში (RFC 6238-ის შესაბამისად)
@@ -12,6 +13,7 @@ QR კოდის გენერაცია და ვიზუალიზ�
 Action Log – ყველა აქტივობის ჩაწერა (Created, Deleted, Accessed)
 Material Design 3 UI + Custom Toolbar და FAB
 
+
 ტექნოლოგიები და ბიბლიოთეკები
 
 **Kotlin** + **Jetpack Navigation**
@@ -20,6 +22,7 @@ Material Design 3 UI + Custom Toolbar და FAB
 **ViewBinding** / **LiveData** / **Coroutines**
 **MVVM სტრუქტურა**
 **Custom RecyclerView + ListAdapter**
+
 
 შენიშვნა
 
