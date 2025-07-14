@@ -1,7 +1,6 @@
 package com.example.twofactorauthapp
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.twofactorauthapp.databinding.FragmentGenerateCodeBinding
 import com.example.twofactorauthapp.util.EncryptionHelper
+import com.example.twofactorauthapp.util.TotpUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -21,7 +24,9 @@ class GenerateCodeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: GenerateCodeFragmentArgs by navArgs()
-    private var timer: CountDownTimer? = null
+
+    private var generateJob: Job? = null
+    private var countdownJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,55 +38,76 @@ class GenerateCodeFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        lifecycleScope.launch {
-            val account = withContext(Dispatchers.IO) {
-                TwoFactorAuthApp.database.accountDao().getAccountById(args.accountId)
-            }
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val account = TwoFactorAuthApp.database.accountDao().getAccountById(args.accountId)
 
             if (account == null) {
-                findNavController().navigateUp()
+                withContext(Dispatchers.Main) {
+                    findNavController().navigateUp()
+                }
                 return@launch
             }
 
-            binding.textViewAccountName.text = account.name
-
-            try {
-                val decryptedKey = EncryptionHelper.decrypt(account.secretKey)
-                startGeneratingCodes(decryptedKey)
+            val decryptedKey = try {
+                EncryptionHelper.decrypt(account.secretKey)
             } catch (e: Exception) {
-                binding.textViewCode.text = "--"
-                binding.textViewTimer.text = "Decryption failed"
+                withContext(Dispatchers.Main) {
+                    binding.textViewCode.text = "--"
+                    binding.textViewTimer.text = "Decryption failed"
+                }
+                return@launch
             }
+
+            withContext(Dispatchers.Main) {
+                binding.textViewAccountName.text = account.name
+            }
+
+            startGeneratingCodes(decryptedKey)
         }
     }
 
     private fun startGeneratingCodes(secretKey: String) {
-        generateCode(secretKey)
-    }
+        generateJob?.cancel()
+        countdownJob?.cancel()
 
-    private fun generateCode(secretKey: String) {
-        val totp = TOTPGenerator(secretKey)
-        val code = totp.generateCurrentCode()
-        val secondsRemaining = totp.secondsUntilNextCode()
+        generateJob = lifecycleScope.launch {
+            while (isActive) {
+                val now = System.currentTimeMillis()
+                val currentTimeSeconds = now / 1000
 
-        binding.textViewCode.text = code
-        binding.textViewTimer.text = "Expires in: ${secondsRemaining}s"
+                val code = TotpUtils.generateTOTP(secretKey, currentTimeSeconds)
 
-        timer?.cancel()
-        timer = object : CountDownTimer(secondsRemaining * 1000L, 1000L) {
-            override fun onTick(millisUntilFinished: Long) {
-                binding.textViewTimer.text = "Expires in: ${millisUntilFinished / 1000}s"
+                withContext(Dispatchers.Main) {
+                    binding.textViewCode.text = code
+                }
+
+                val nextInterval = ((now / 30000) + 1) * 30000
+                val delayMillis = nextInterval - now
+
+                delay(delayMillis)
             }
+        }
 
-            override fun onFinish() {
-                generateCode(secretKey)
+        countdownJob = lifecycleScope.launch {
+            while (isActive) {
+                val now = System.currentTimeMillis()
+                val secondsRemaining = 30 - ((now / 1000) % 30).toInt()
+
+                withContext(Dispatchers.Main) {
+                    binding.textViewTimer.text = "Expires in: $secondsRemaining s"
+                }
+
+                delay(1000L)
             }
-        }.start()
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        timer?.cancel()
+        generateJob?.cancel()
+        countdownJob?.cancel()
         _binding = null
     }
 }

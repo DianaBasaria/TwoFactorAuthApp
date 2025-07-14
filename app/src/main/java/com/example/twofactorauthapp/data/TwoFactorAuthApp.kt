@@ -3,6 +3,7 @@ package com.example.twofactorauthapp
 import android.app.Application
 import androidx.room.Room
 import com.example.twofactorauthapp.data.AppDatabase
+import com.example.twofactorauthapp.util.EncryptionHelper
 
 class TwoFactorAuthApp : Application() {
     companion object {
@@ -12,6 +13,7 @@ class TwoFactorAuthApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        EncryptionHelper.init(applicationContext)
         database = AppDatabase.getInstance(applicationContext)
     }
 }
